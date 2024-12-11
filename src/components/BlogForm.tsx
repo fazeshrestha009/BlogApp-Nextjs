@@ -38,6 +38,7 @@ const Blogform: React.FC = () => {
           },
         }
       );
+      alert("Your post created successfully!");
 
       console.log("Blog created successfully:", response.data);
       setTitle("");
@@ -104,15 +105,14 @@ const Blogform: React.FC = () => {
             />
           </div>
         )}
-        <Link href="/posts/blogs">
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white p-2 rounded"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Submitting..." : "Submit"}
-          </button>
-        </Link>
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white p-2 rounded"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Submitting..." : "Submit"}
+        </button>
+        
       </form>
     </div>
   );
