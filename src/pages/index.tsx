@@ -1,5 +1,5 @@
 import React from 'react'
-import BlogForm from '../components/BlogForm';
+import Blogform from '../components/blogForm';
 
 const home = () => {
   return (
@@ -8,7 +8,7 @@ const home = () => {
     <p className="text-lg">A place where I share my thoughts and ideas.</p>
   </div>
   <div className="max-w-4xl mx-auto p-6">
-      <BlogForm />
+      <Blogform />
     </div>
   </div>
   )
