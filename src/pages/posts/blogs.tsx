@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useRouter } from "next/router";
 
 interface Blog {
   id: string;
@@ -12,6 +13,8 @@ const BlogPosts: React.FC = () => {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const router=useRouter();
+
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -30,6 +33,22 @@ const BlogPosts: React.FC = () => {
 
     fetchBlogs();
   }, []);
+
+   const handleDelete=async(id:string) =>{
+    try{
+        await axios.delete(`http://127.0.0.1:8090/api/collections/blog/records/${id}`);
+        setBlogs(blogs.filter((blog) => blog.id !==id));
+        alert("Your post is deleted.");
+    }
+    catch(err){
+        console.error("Error deleting post:",err);
+        alert("fail to delete post.");
+    }
+
+   }
+    const handleUpdate=async(id:string)=>{
+        router.push(`/updateBlog/${id}`);
+    }
 
   if (loading) {
     return <div className="text-center mt-6">Loading...</div>;
@@ -54,6 +73,23 @@ const BlogPosts: React.FC = () => {
               />
             )}
             <p className="text-gray-700">{blog.description}</p>
+            <div className="mt-4 flex justify-between">
+                <button
+                onClick={()=>handleDelete(blog.id)}
+                className="bg-red-500 text-white px-4 py-2 rounded"
+                >
+                    Delete
+
+                </button>
+                <button
+                onClick={()=>handleUpdate(blog.id)}
+                className="bg-green-500 text-white px-4 py-2 rouded"
+                >
+                    Edit
+
+                </button>
+
+            </div>
           </div>
         ))}
       </div>
