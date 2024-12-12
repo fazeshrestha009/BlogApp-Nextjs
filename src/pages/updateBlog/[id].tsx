@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useForm, Controller } from "react-hook-form";
 import { useRouter } from "next/router";
 
 interface Blog {
@@ -9,13 +10,20 @@ interface Blog {
   image: string;
 }
 
+interface UpdateFormInputs {
+  title: string;
+  description: string;
+  image: FileList | null;
+}
+
 const UpdateBlog: React.FC = () => {
   const [blog, setBlog] = useState<Blog | null>(null);
-  const [title, setTitle] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { isSubmitting },
+  } = useForm<UpdateFormInputs>();
   const router = useRouter();
   const { id } = router.query;
 
@@ -31,35 +39,25 @@ const UpdateBlog: React.FC = () => {
 
         console.log("Fetched Blog:", fetchedBlog);
         setBlog(fetchedBlog);
-        setTitle(fetchedBlog.title);
-        setDescription(fetchedBlog.description);
-        setImagePreview(fetchedBlog.image);
+        reset({
+          title: fetchedBlog.title,
+          description: fetchedBlog.description,
+        });
       } catch (error) {
         console.error("Error fetching blog:", error);
       }
     };
 
     fetchBlog();
-  }, [id]);
+  }, [id, reset]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImage(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
+  const onSubmit = async (data: UpdateFormInputs) => {
     try {
       const formData = new FormData();
-      formData.append("title", title);
-      formData.append("description", description);
-      if (image) {
-        formData.append("image", image);
+      formData.append("title", data.title);
+      formData.append("description", data.description);
+      if (data.image && data.image.length > 0) {
+        formData.append("image", data.image[0]);
       }
 
       console.log("Form Data:", formData);
@@ -79,8 +77,6 @@ const UpdateBlog: React.FC = () => {
     } catch (error) {
       console.error("Error updating blog:", error);
       alert("Failed to update the blog post.");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -92,55 +88,68 @@ const UpdateBlog: React.FC = () => {
     <div className="max-w-md mx-auto p-4 pb-10 bg-lightblue-100 shadow-sm rounded">
       <h2 className="text-xl font-semibold mb-4">Update Blog Post</h2>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-3">
           <label htmlFor="title" className="block text-sm text-gray-700">
             Title
           </label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full mt-1 p-2 border rounded"
+          <Controller
+            name="title"
+            control={control}
+            defaultValue=""
+            rules={{ required: "Title is required" }}
+            render={({ field }) => (
+              <input
+                type="text"
+                id="title"
+                {...field}
+                className="w-full mt-1 p-2 border rounded"
+              />
+            )}
           />
         </div>
+
         <div className="mb-3">
           <label htmlFor="description" className="block text-sm text-gray-700">
             Content
           </label>
-          <textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full mt-1 p-2 border rounded"
+          <Controller
+            name="description"
+            control={control}
+            defaultValue=""
+            rules={{ required: "Description is required" }}
+            render={({ field }) => (
+              <textarea
+                id="description"
+                {...field}
+                className="w-full mt-1 p-2 border rounded"
+              />
+            )}
           />
         </div>
+
         <div className="mb-3">
           <label htmlFor="image" className="block text-sm text-gray-700">
             Upload Image
           </label>
-          <input
-            type="file"
-            id="image"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="w-full mt-1 p-2 border rounded"
+          <Controller
+            name="image"
+            control={control}
+            defaultValue={null}
+            render={({ field }) => (
+              <input
+                type="file"
+                id="image"
+                accept="image/*"
+                onChange={(e) => field.onChange(e.target.files)}
+                className="w-full mt-1 p-2 border rounded"
+              />
+            )}
           />
         </div>
-        {imagePreview && (
-          <div className="mb-3">
-            <p className="text-sm text-gray-500">Image Preview:</p>
-            <img
-              src={imagePreview}
-              alt="Selected Image Preview"
-              className="w-full h-48 object-cover mt-2 rounded"
-            />
-          </div>
-        )}
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white p-2 rounded"
+          className="w-full bg-yellow-500 text-white p-2 rounded"
           disabled={isSubmitting}
         >
           {isSubmitting ? "Updating..." : "Update"}

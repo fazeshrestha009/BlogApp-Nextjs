@@ -14,8 +14,8 @@ const Navbar: React.FC = () => {
           <Link href="/" className="mr-6 mt-4">
             Home
           </Link>
-          <Link href="/posts/blogs" className="mr-6 mt-4">
-            Posts
+          <Link href="/uploadPost/Form" className="mr-6 mt-4">
+            Upload
           </Link>
         </div>
       </div>
